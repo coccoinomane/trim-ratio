@@ -19,7 +19,7 @@ The script will output two files:
 
 Only the first parameter is required, and that is the input image file; the other parameters are:
 
-* `padding`: how much of the background to be left around the highest detail region; default is 0 pixels.
+* `padding`: how many background pixels to leave around the highest detail region; default is 0 pixels. This is the horizontal padding; the vertical padding will be determined automatically to be the value that keeps the aspect ratio of the output image unchanged.
 * `output folder`: folder where to store the two output images; default is the current working directory.
 * `blur`: pixel parameter to the -blur command, default is 5 pixels.
 
