@@ -117,12 +117,6 @@ xT="$(echo "$xT-($pad)/2" | bc)"
 HT="$(echo "$HT+$pad" | bc)"
 yT="$(echo "$yT-($pad)/2" | bc)"
 
-# Round to integer (not needed unless you use bc -l)
-# WT="$(echo "($WT+0.5)/1" | bc)" # round to int
-# HT="$(echo "($HT+0.5)/1" | bc)" # round to int
-# xT="$(echo "($xT+0.5)/1" | bc)" # round to int
-# yT="$(echo "($yT+0.5)/1" | bc)" # round to int
-
 # Output final image
 padded_rectangle="${WT}x${HT}+${xT}+${yT}"
 echo "  rectangle with pad = $padded_rectangle"
