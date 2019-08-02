@@ -71,12 +71,21 @@ yT=$yB
 
 # Recover aspect ratio
 if (( $(echo "$WB > $AR*$HB" | bc) )); then
+    # Width is in excess => add padding vertically
     echo "  forcing aspect ratio to $AR"
     HT="$(echo "$WB/$AR" | bc)"
-    yT="$(echo "$yB+($HB-$HT)/2" | bc)"
+    D2="$(echo "($HT-$HB)/2" | bc)" # delta_half = pad needed in the up & down direction
+    yT="$(echo "$yB-$D2" | bc)"
+    # Adjust vertical position of crop box
+    if (( $(echo "$D2 > $SB" | bc) )); then
+        yT="$(echo "$H-$HT" | bc)"
+    elif (( $(echo "$D2 > $ST" | bc) )); then
+        yT="0"
+    fi
     echo "    height changed from $HB to $HT"
     echo "    vertical position (y) changed from $yB to $yT"
 else
+    # Height is in excess => add padding horizontally
     echo "  forcing aspect ratio to $AR"
     WT="$(echo "$AR*$HT" | bc)"
     xT="$(echo "$xB+($WB-$WT)/2" | bc)"
