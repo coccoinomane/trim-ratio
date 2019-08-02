@@ -37,6 +37,7 @@ AR=$(magick "$image" -format "%[fx:w/h]" info: )
 
 # Output images
 trimmed_image="${out_folder}/${name}_blur${blur}_trim.jpg"
+zeropad_image="${out_folder}/${name}_blur${blur}_pad0.jpg"
 padded_image="${out_folder}/${name}_blur${blur}_pad${pad}.jpg"
 
 echo "Processing image ${name} with size ${W}x${H} and AR=${AR}..."
@@ -100,22 +101,30 @@ else
     echo "    horizontal position changed from $xB to $xT"
 fi
 
-# Add padding
-if (( pad > 0 )); then
-    WT="$(echo "$WT+$pad" | bc)"
-    xT="$(echo "$xT-($pad)/2" | bc)"
-    HT="$(echo "$HT+$pad" | bc)"
-    yT="$(echo "$yT-($pad)/2" | bc)"
-fi
+# Write zero padding image
+zeropad_rectangle="${WT}x${HT}+${xT}+${yT}"
+echo "  zeropad rectangle = $zeropad_rectangle"
+echo "  writing to $zeropad_image"
+magick "$image" -crop "$zeropad_rectangle" +repage "$zeropad_image"
 
-# Round to integer
-WT="$(echo "($WT+0.5)/1" | bc)" # round to int
-HT="$(echo "($HT+0.5)/1" | bc)" # round to int
-xT="$(echo "($xT+0.5)/1" | bc)" # round to int
-yT="$(echo "($yT+0.5)/1" | bc)" # round to int
+# If no padding was requested we are done 
+(( pad <= 0 )) && { echo "  No padding requested, will exit"; exit; }
+echo "  will now apply uniform pad of $pad pixels"
+
+# Add padding
+WT="$(echo "$WT+$pad" | bc)"
+xT="$(echo "$xT-($pad)/2" | bc)"
+HT="$(echo "$HT+$pad" | bc)"
+yT="$(echo "$yT-($pad)/2" | bc)"
+
+# Round to integer (not needed unless you use bc -l)
+# WT="$(echo "($WT+0.5)/1" | bc)" # round to int
+# HT="$(echo "($HT+0.5)/1" | bc)" # round to int
+# xT="$(echo "($xT+0.5)/1" | bc)" # round to int
+# yT="$(echo "($yT+0.5)/1" | bc)" # round to int
 
 # Output final image
 padded_rectangle="${WT}x${HT}+${xT}+${yT}"
-echo "  final rectangle = $padded_rectangle"
+echo "  rectangle with pad = $padded_rectangle"
 echo "  writing to $padded_image"
 magick "$image" -crop "$padded_rectangle" +repage "$padded_image"
