@@ -4,11 +4,15 @@
 # changing its aspect ratio.
 #
 # Optionally specify how many pixels to pad around the
-# highest detail region; the padding will be taken
+# highest detail region; the padded pixels will be taken
 # from the actual image.
 #
-# Useful to trim background around the subject, while
-# keeping the same AR and having control on how much
+# The padding is done preserving the aspect ratio; for this
+# reason the scripts takes only the horizontal padding (in
+# pixels).
+#
+# The script is useful to trim background around the subject,
+# while keeping the same AR and having control on how much
 # is trimmed.
 #
 # Requires bash with the bc arithmetical library.
@@ -25,7 +29,7 @@
 
 # Parse arguments
 image="$1"
-pad=${2-0}
+pad=${2-0} # horizontal pad
 out_folder=${3-.}
 blur=${4-5}
 
@@ -112,10 +116,11 @@ magick "$image" -crop "$zeropad_rectangle" +repage "$zeropad_image"
 echo "  will now apply uniform pad of $pad pixels"
 
 # Add padding
+v_pad=$(echo "$pad / $AR" | bc)
 WT="$(echo "$WT+$pad" | bc)"
-xT="$(echo "$xT-($pad)/2" | bc)"
-HT="$(echo "$HT+$pad" | bc)"
-yT="$(echo "$yT-($pad)/2" | bc)"
+xT="$(echo "$xT-$pad/2" | bc)"
+HT="$(echo "$HT+$v_pad" | bc)"
+yT="$(echo "$yT-$v_pad/2" | bc)"
 
 # Output final image
 padded_rectangle="${WT}x${HT}+${xT}+${yT}"
