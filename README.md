@@ -4,6 +4,25 @@ Trim an image around the highest detail region without changing its aspect ratio
 
 Requires bash with the bc library and [ImageMagick](https://imagemagick.org/) v7.
 
+## Usage
+
+Run the script as:
+
+```bash
+./trim-ratio.sh <input image> [<padding (default 0px)>] [<output folder (default current folder)>] [<blur (default 5px)>]
+```
+
+The script will output two files:
+
+* One containing only the highest detail region; this file ends with `_trim.jpg`.
+* One with the highest detail region expanded to match the aspect ratio of the original image, plus any optional padding. This file ends either with `_pad0.jpg` if no padding is requested, or with `_padXX.jpg` if padding is requested.
+
+Only the first parameter is required, and that is the input image file; the other parameters are:
+
+* *padding*: how much of the background to be left around the highest detail region; default is 0 pixels.
+* *output folder*: folder where to store the two output images; default is the current working directory.
+* *blur*: pixel parameter to the -blur command, default is 5 pixels.
+
 ## Examples
 
 The following examples use the images in the `img-test` and `img-test-out` folders.
