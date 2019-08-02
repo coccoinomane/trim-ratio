@@ -68,7 +68,7 @@ SL=$xB
 SR=$((W-WB-SL))
 echo "  available space: top=${ST}, bottom=${SB}, left=${SL}, right=${SR}"
 
-# Initialize parameters of new crop area
+# Initialize parameters of new (T as Transformed) crop area
 WT=$WB
 HT=$HB
 xT=$xB
@@ -127,3 +127,7 @@ padded_rectangle="${WT}x${HT}+${xT}+${yT}"
 echo "  rectangle with pad = $padded_rectangle"
 echo "  writing to $padded_image"
 magick "$image" -crop "$padded_rectangle" +repage "$padded_image"
+
+# Final check on aspect ratio
+ART=$(magick "$padded_image" -format '%[fx:w/h]' info:)
+# if (( $(echo "$AR/$ART - 1" | bc) )); then
