@@ -20,6 +20,10 @@ h_pad=${2-0} # horizontal pad
 u_pad=${3-5}
 out_folder=${4-.}
 
+# Fixed parameters
+AR_tolerance="10^-3"
+canny_parameters="0x1+10%+30%"
+
 # Get of image info
 name=$(magick "$image" -format "%t" info:)
 W=$(magick "$image" -format "%[w]" info: )
@@ -34,7 +38,7 @@ padded_image="$out_folder/${name}_upad${u_pad}_hpad${h_pad}.jpg"
 echo "Processing image ${name} with size ${W}x${H} and AR=${AR}..."
 
 # Get rectangle bounding highest definition area, and store its parts
-bounding_rectangle=$(magick "$image" -canny 0x1+10%+30% -blur "${u_pad}"x65000 -format "%@" info:)
+bounding_rectangle=$(magick "$image" -canny "$canny_parameters" -blur "${u_pad}"x65000 -format "%@" info:)
 # bounding_rectangle=$(magick "$image" -canny 0x1+2%+8% -blur "${u_pad}"x65000 -format "%@" info:)
 echo "  bounding rectangle = $bounding_rectangle" 
 WB=$(echo "$bounding_rectangle" | sed -E -e 's/^([[:digit:]]+).*/\1/')
@@ -64,16 +68,16 @@ xT=$xB
 yT=$yB
 
 # Recover aspect ratio
-if (( $(echo "$WB > $AR*$HB" | bc) )); then
+if (( $(echo "$WB > $AR*$HB" | bc -l) )); then
     # Width is in excess => add padding vertically
     echo "  forcing aspect ratio to $AR"
-    HT="$(echo "$WB/$AR" | bc)"
-    D2="$(echo "($HT-$HB)/2" | bc)" # delta_half = pad needed in the up & down direction
-    yT="$(echo "$yB-$D2" | bc)"
+    HT="$(echo "$WB/$AR" | bc -l)"
+    D2="$(echo "($HT-$HB)/2" | bc -l)" # delta_half = pad needed in the up & down direction
+    yT="$(echo "$yB-$D2" | bc -l)"
     # Adjust vertical position of crop box
-    if (( $(echo "$SB < $D2" | bc) )); then
-        yT="$(echo "$H-$HT" | bc)"
-    elif (( $(echo "$ST < $D2" | bc) )); then
+    if (( $(echo "$SB < $D2" | bc -l) )); then
+        yT="$(echo "$H-$HT" | bc -l)"
+    elif (( $(echo "$ST < $D2" | bc -l) )); then
         yT="0"
     fi
     echo "    height changed from $HB to $HT"
@@ -81,14 +85,14 @@ if (( $(echo "$WB > $AR*$HB" | bc) )); then
 else
     # Height is in excess => add padding horizontally
     echo "  forcing aspect ratio to $AR"
-    WT="$(echo "$AR*$HT" | bc)"
-    D2="$(echo "($WT-$WB)/2" | bc)"
-    xT="$(echo "$xB-$D2" | bc)"
+    WT="$(echo "$AR*$HT" | bc -l)"
+    D2="$(echo "($WT-$WB)/2" | bc -l)"
+    xT="$(echo "$xB-$D2" | bc -l)"
     # Adjust horizontal position of crop box
-    if (( $(echo "$SL < $D2" | bc) )); then
+    if (( $(echo "$SL < $D2" | bc -l) )); then
         xT="0"
-    elif (( $(echo "$SR < $D2" | bc) )); then
-        xT="$(echo "$W-$WT" | bc)"
+    elif (( $(echo "$SR < $D2" | bc -l) )); then
+        xT="$(echo "$W-$WT" | bc -l)"
     fi
     echo "    width changed from $WB to $WT"
     echo "    horizontal position changed from $xB to $xT"
@@ -106,14 +110,20 @@ echo "  will now apply uniform pad of $h_pad pixels"
 
 # Add padding
 # TODO: skip out-of-bounds paddings
-v_pad=$(echo "$h_pad / $AR" | bc)
-WT="$(echo "$WT+2*$h_pad" | bc)"
-xT="$(echo "$xT-$h_pad" | bc)"
-HT="$(echo "$HT+2*$v_pad" | bc)"
-yT="$(echo "$yT-$v_pad" | bc)"
+v_pad=$(echo "$h_pad / $AR" | bc -l)
+WT="$(echo "$WT+2*$h_pad" | bc -l)"
+xT="$(echo "$xT-$h_pad" | bc -l)"
+HT="$(echo "$HT+2*$v_pad" | bc -l)"
+yT="$(echo "$yT-$v_pad" | bc -l)"
 
-# Output final image
+# Output final image
 padded_rectangle="${WT}x${HT}+${xT}+${yT}"
 echo "  rectangle with pad = $padded_rectangle"
 echo "  writing to $padded_image"
 magick "$image" -crop "$padded_rectangle" +repage "$padded_image"
+
+# Checks
+ART=$(magick "$padded_image" -format "%[fx:w/h]" info:)
+AR_diff=$(echo "$ART/$AR-1" | bc -l)
+AR_diff=$(echo "if ($AR_diff < 0) $AR_diff*-1 else $AR_diff" | bc -l)
+(( $(echo "$AR_diff > $AR_tolerance" | bc -l) )) && echo "  WARNING $name: AR discrepance => AR in=$AR, AR out=$ART"
