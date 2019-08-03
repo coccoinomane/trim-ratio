@@ -11,10 +11,10 @@ It has been succesfully tested with catalogue and e-commerce images.
 
 The algorithm works in three steps:
 
-1. The rectangle bounding the highest detail region is found using the [-canny option](https://imagemagick.org/discourse-server/viewtopic.php?t=25405) of ImageMagick.
-2. Optionally, the rectangle is expanded uniformly in the 4 directions by the given number of pixels (`u_pad` parameter).
-3. The rectangle is expanded to retain the aspect ratio of the original image.
-4. Optionally, the rectangle is further expanded while keeping the same aspect ratio (`h_pad` parameter).
+1. Find the rectangle around the highest detail region using the [-canny option](https://imagemagick.org/discourse-server/viewtopic.php?t=25405) of ImageMagick.
+2. Optionally expand the rectangle uniformly in the 4 directions by `u_pad` pixels.
+3. Expand the rectangle to retain the aspect ratio of the original image.
+4. Optionally expand the rectangle of `h_pad` pixels while keeping the same aspect ratio.
 
 The algorithm works best with images depicting an high detail object on a low detail background.
 
