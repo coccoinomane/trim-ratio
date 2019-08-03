@@ -1,6 +1,24 @@
-# TrimRatio - Trim an image keeping same Aspect Ratio
+# TrimRatio ImageMagick Script
 
-Trim an image around the highest detail region without changing its aspect ratio.
+Trim and center an image around the highest detail region without changing its aspect ratio.
+
+The script is useful to trim background around the subject, while keeping the same AR and having control on how much
+is trimmed.
+
+It has been succesfully tested with catalogue and e-commerce images.
+
+## ALGORITHM
+
+The algorithm works in three steps:
+
+1. The rectangle bounding the highest detail region is found using the [-canny option](https://imagemagick.org/discourse-server/viewtopic.php?t=25405) of ImageMagick.
+2. Optionally, the rectangle is expanded uniformly in the 4 directions by the given number of pixels (`u_pad` parameter).
+3. The rectangle is expanded to retain the aspect ratio of the original image.
+4. Optionally, the rectangle is further expanded while keeping the same aspect ratio (`h_pad` parameter).
+
+The algorithm works best with images depicting an high detail object on a low detail background.
+
+## REQUIREMENTS
 
 Requires bash with the bc library and [ImageMagick](https://imagemagick.org/) v7.
 
@@ -9,19 +27,36 @@ Requires bash with the bc library and [ImageMagick](https://imagemagick.org/) v7
 Run the script as:
 
 ```bash
-./trim-ratio.sh <input image> [<padding (default 0px)>] [<output folder (default current folder)>] [<blur (default 5px)>]
+./trim-ratio.sh <image> [<h_pad>] [<u_pad>] [<output folder>]
 ```
 
-The script will output two files:
+The script takes the following 4 parameters:
 
-* One containing only the highest detail region; this file ends with `_trim.jpg`.
-* One with the highest detail region expanded to match the aspect ratio of the original image, plus any optional padding. This file ends either with `_pad0.jpg` if no padding is requested, or with `_padXX.jpg` if padding is requested.
+* `input image`: image file to be processed.
+* `h_pad`: how much background to keep left and right of the highest detail region. Default: 0px.
+* `u_pad`: how much background to keep in the 4 directions around the highest detail region. Default: 5px.
+* `output folder`: where to save output images. Ddefault: current folder.
 
-Only the first parameter is required, and that is the input image file; the other parameters are:
+## H_PAD vs U_PAD
 
-* `padding`: how many background pixels to leave around the highest detail region; default is 0 pixels. This is the horizontal padding; the vertical padding will be determined automatically to be the value that keeps the aspect ratio of the output image unchanged.
-* `output folder`: folder where to store the two output images; default is the current working directory.
-* `blur`: pixel parameter to the -blur command, default is 5 pixels.
+Whether to use `h_pad`, `u_pad` or both depends on two aspects:
+
+1. The aspect ratio (AR) of the highest detail region compared to the AR of the image.
+2. The position of the highest detail region in the image.
+
+In general, `h_pad` is better suited if it is important that the highest detail regions stays in the center of the image (although it does not make much difference if AR=1).
+
+For more details please refer to the algorithm section above.
+
+## OUTPUT
+
+The script will output the following images:
+
+1. The image with the highest detail region, padded with `u_pad` pixels in the 4 directions. This file ends with `_upadXX_trim.jpg`.
+2. Image 1, expanded to match the aspect ratio of the original image. This file ends with `_upadXX_hpad0.jpg`.
+3. Image 2, expanded with `h_pad` pixels of left & right padding and with `h_pad/AR` pixels of top & botton padding. This file ends with `_upadXX_hadYY.jpg`.
+
+If the `h_pad` parameter is zero or not set, only 2 images will be produced because image 2 and 3 are identical.
 
 ## EXAMPLES
 
@@ -30,30 +65,32 @@ The following examples use the images in the `img-test` and `img-test-out` folde
 ### Trim an image with no padding
 
 ```bash
-./trim-ratio.sh img-test/_POD0009.jpg 0 img-test-out
+./trim-ratio.sh img-test/_POD0009.jpg 0 5 img-test-out
 ```
 
-Will process the image img-test/_POD0009.jpg ([link](img-test/_POD0009.jpg)) and generate two images:
-
-* *img-test-out/_POD0009_blur5_trim.jpg* with the highest detail region ([link](img-test-out/_POD0009_blur5_trim.jpg)).
-
-* *img-test-out/_POD0009_blur5_pad0.jpg* with the highest detail region plus enough background to maintain the original aspect ratio ([link](img-test-out/_POD0009_blur5_pad0.jpg)).
+* INPUT: [img-test-out/_POD0009.jpg](img-test/_POD0009.jpg)
+* OUTPUT: [img-test-out/_POD0009_upad5_hpad0.jpg](img-test-out/_POD0009_upad5_hpad0.jpg)
 
 ### Trim an image and add 200px padding
 
 ```bash
-./trim-ratio.sh img-test/_POD0009.jpg 200 img-test-out
+./trim-ratio.sh img-test/_POD0009.jpg 200 5 img-test-out
 ```
 
-Will process the image img-test/_POD0009.jpg ([link](img-test/_POD0009.jpg)) and generate two images:
-
-* *img-test-out/_POD0009_blur5_trim.jpg* with the highest detail region ([link](img-test-out/_POD0009_blur5_trim.jpg)).
-* *img-test-out/_POD0009_blur5_pad200.jpg* with the highest detail region plus enough background to maintain the original aspect ratio plus 200px padding in all directions, where the padding is taken from the background of the original image ([link](img-test-out/_POD0009_blur5_pad200.jpg)).
+* INPUT: [img-test-out/_POD0009.jpg](img-test/_POD0009.jpg)
+* OUTPUT: [img-test-out/_POD0009_upad5_hpad200.jpg](img-test-out/_POD0009_upad5_hpad200.jpg)
 
 ### Trim an entire folder of images with 200px padding
 
 ```bash
-find img-test -type f -depth 1 -name "*.jpg" | xargs -I {} ./trim-ratio.sh {} 200 img-test-out
+find img-test -type f -depth 1 -name "*.jpg" | xargs -I {} ./trim-ratio.sh {} 200 5 img-test-out
 ```
 
-For each image in the `img-test` folder ([link](img-test)), two files will be generated: one with the highest detail region (_trim.jpg), and one with the 200px padding (_pad200.jpg) ([link to the output folder](img-test-out)).
+Process all images in the `img-test` folder.
+
+* INPUT: [img-test folder](img-test)
+* OUTPUT: [img-test-out folder](img-test-out)
+
+## CREDITS
+
+A huge thank to Fred Weinhaus for suggesting using canny & blur, and to Snibgo from the ImageMagick forums for helping me understand the steps needed to make the algorithm work ([link to the original forum thread](https://imagemagick.org/discourse-server/viewtopic.php?f=1&t=36443)).
