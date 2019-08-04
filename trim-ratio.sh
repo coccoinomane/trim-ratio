@@ -110,15 +110,40 @@ magick "$image" -crop "$zeropad_rectangle" +repage "$zeropad_image"
 
 # If no padding was requested we are done 
 (( h_pad <= 0 )) && { echo "  No padding requested, will exit"; exit; }
-echo "  will now apply uniform pad of $h_pad pixels"
+echo "  will now apply horizontal pad of $h_pad pixels"
 
-# Add padding
-# TODO: skip out-of-bounds paddings
-v_pad=$(echo "$h_pad / $AR" | bc -l)
-WT="$(echo "$WT+2*$h_pad" | bc -l)"
-xT="$(echo "$xT-$h_pad" | bc -l)"
-HT="$(echo "$HT+2*$v_pad" | bc -l)"
-yT="$(echo "$yT-$v_pad" | bc -l)"
+# Space around the AR image
+ST=$yT
+SB=$(echo "$H-$HT-$ST" | bc -l)
+SL=$xT
+SR=$(echo "$W-$WT-$SL" | bc -l)
+echo "    available space: top=${ST}, bottom=${SB}, left=${SL}, right=${SR}"
+
+# Find maximum possibile horizontal padding
+h_pad_max=$h_pad
+if (( $(echo "$SL<$h_pad_max" | bc -l) )); then
+    h_pad_max=$SL
+    echo "    notice: will reduce h_pad from $h_pad to $h_pad_max to stay in image left boundary"
+fi
+if (( $(echo "$SR<$h_pad_max" | bc -l) )); then
+    h_pad_max=$SR
+    echo "    notice: will reduce h_pad from $h_pad to $h_pad_max to stay in image right boundary"
+fi
+if (( $(echo "$ST<$h_pad_max/$AR" | bc -l) )); then
+    h_pad_max=$(echo "$ST*$AR" | bc -l)
+    echo "    notice: will reduce h_pad from $h_pad to $h_pad_max to stay in image top boundary"
+fi
+if (( $(echo "$SB<$h_pad_max/$AR" | bc -l) )); then
+    h_pad_max=$(echo "$SB*$AR" | bc -l)
+    echo "    notice: will reduce h_pad from $h_pad to $h_pad_max to stay in image bottom boundary"
+fi
+
+# Pad the crop rectangle
+v_pad_max=$(echo "$h_pad_max/$AR" | bc -l)
+WT="$(echo "$WT+2*$h_pad_max" | bc -l)"
+xT="$(echo "$xT-$h_pad_max" | bc -l)"
+HT="$(echo "$HT+2*$v_pad_max" | bc -l)"
+yT="$(echo "$yT-$v_pad_max" | bc -l)"
 
 # Output final image
 padded_rectangle="${WT}x${HT}+${xT}+${yT}"
@@ -130,4 +155,4 @@ magick "$image" -crop "$padded_rectangle" +repage "$padded_image"
 ART=$(magick "$padded_image" -format "%[fx:w/h]" info:)
 AR_diff=$(echo "$ART/$AR-1" | bc -l)
 AR_diff=$(echo "if ($AR_diff < 0) $AR_diff*-1 else $AR_diff" | bc -l)
-(( $(echo "$AR_diff > $AR_tolerance" | bc -l) )) && echo "  WARNING $name: AR discrepance => AR in=$AR, AR out=$ART"
+(( $(echo "$AR_diff > $AR_tolerance" | bc -l) )) && echo "  WARNING: Found AR discrepance for $name => AR_in=$AR, AR_out=$ART"
