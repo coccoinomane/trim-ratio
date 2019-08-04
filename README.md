@@ -24,7 +24,7 @@ Requires bash with the bc library and [ImageMagick](https://imagemagick.org/) v7
 
 ## USAGE
 
-Run the script as:
+Make sure the two .sh files are in the same folder, then run the script as:
 
 ```bash
 ./trim-ratio.sh <image> [<h_pad>] [<u_pad>] [<output folder>]
