@@ -35,7 +35,7 @@ The script takes the following 4 parameters:
 * `input image`: image file to be processed.
 * `h_pad`: how much background to keep left and right of the highest detail region. Default: 0px.
 * `u_pad`: how much background to keep in the 4 directions around the highest detail region. Default: 5px.
-* `output folder`: where to save output images. Ddefault: current folder.
+* `output folder`: where to save output images. Default: current folder.
 
 ## H_PAD vs U_PAD
 
