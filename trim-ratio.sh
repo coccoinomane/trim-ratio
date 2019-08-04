@@ -76,8 +76,10 @@ if (( $(echo "$WB > $AR*$HB" | bc -l) )); then
     yT="$(echo "$yB-$D2" | bc -l)"
     # Adjust vertical position of crop box
     if (( $(echo "$SB < $D2" | bc -l) )); then
+        echo "    notice: object close to bottom edge, will pad more from top"
         yT="$(echo "$H-$HT" | bc -l)"
     elif (( $(echo "$ST < $D2" | bc -l) )); then
+        echo "    notice: object close to top edge, will pad more from bottom"
         yT="0"
     fi
     echo "    height changed from $HB to $HT"
@@ -90,8 +92,10 @@ else
     xT="$(echo "$xB-$D2" | bc -l)"
     # Adjust horizontal position of crop box
     if (( $(echo "$SL < $D2" | bc -l) )); then
+        echo "    notice: object close to left edge, will pad more from right"
         xT="0"
     elif (( $(echo "$SR < $D2" | bc -l) )); then
+        echo "    notice: object close to right edge, will pad more from left"
         xT="$(echo "$W-$WT" | bc -l)"
     fi
     echo "    width changed from $WB to $WT"

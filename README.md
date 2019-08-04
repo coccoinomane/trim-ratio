@@ -9,7 +9,7 @@ It has been succesfully tested with catalogue and e-commerce images.
 
 ## ALGORITHM
 
-The algorithm works in three steps:
+The algorithm works in four steps:
 
 1. Find the rectangle around the highest detail region using the [-canny option](https://imagemagick.org/discourse-server/viewtopic.php?t=25405) of ImageMagick.
 2. Optionally expand the rectangle uniformly in the 4 directions by `u_pad` pixels.
