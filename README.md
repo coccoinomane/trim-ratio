@@ -14,9 +14,9 @@ The algorithm works in four steps:
 1. Find the rectangle around the highest detail region using the [-canny option](https://imagemagick.org/discourse-server/viewtopic.php?t=25405) of ImageMagick.
 2. Optionally expand the rectangle uniformly in the 4 directions by `u_pad` pixels.
 3. Expand the rectangle to retain the aspect ratio of the original image.
-4. Optionally expand the rectangle of `h_pad` pixels while keeping the same aspect ratio.
+4. Optionally expand the rectangle of `h_pad` pixels, ensuring the expansion does not alter the aspect ratio or exceed the image boundaries.
 
-The algorithm works best with images depicting an high detail object on a low detail background.
+The algorithm works best with images depicting an high detail object on a low detail background, such as the picture of a product on a limbo background.
 
 ## REQUIREMENTS
 
@@ -33,7 +33,7 @@ Run the script as:
 The script takes the following 4 parameters:
 
 * `input image`: image file to be processed.
-* `h_pad`: how much background to keep left and right of the highest detail region. Default: 0px.
+* `h_pad`: how much background to keep left and right of the highest detail region. Default: 0px.
 * `u_pad`: how much background to keep in the 4 directions around the highest detail region. Default: 5px.
 * `output folder`: where to save output images. Ddefault: current folder.
 
@@ -48,7 +48,7 @@ In general, `h_pad` is better suited if it is important that the highest detail 
 
 For more details please refer to the algorithm section above.
 
-## OUTPUT
+## OUTPUT
 
 The script will output the following images:
 
@@ -90,6 +90,11 @@ Process all images in the `img-test` folder.
 
 * INPUT: [img-test folder](img-test)
 * OUTPUT: [img-test-out folder](img-test-out)
+
+## TODO
+
+* Get rid of the `u_pad` parameter, which is confusing.
+* Instead of just giving `h_pad` the user should be able to specify either horizontal padding (both `left_pad` and `right_pad`) or vertical padding (both `top_pad` and `bottom_pad`). The `smarttrim` script by Fred should provide inspiration on how to parse these arguments.
 
 ## CREDITS
 
