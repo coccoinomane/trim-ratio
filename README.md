@@ -95,6 +95,7 @@ Process all images in the `img-test` folder.
 
 * Get rid of the `u_pad` parameter, which is confusing.
 * Instead of just giving `h_pad` the user should be able to specify either horizontal padding (both `left_pad` and `right_pad`) or vertical padding (both `top_pad` and `bottom_pad`). The `smarttrim` script by Fred should provide inspiration on how to parse these arguments.
+* Use `printf` instead of `echo` to print floating points to screen so that you can round them.
 
 ## CREDITS
 
