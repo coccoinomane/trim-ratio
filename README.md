@@ -39,10 +39,14 @@ The script takes the following 4 parameters:
 
 ## H_PAD vs U_PAD
 
-Whether to use `h_pad`, `u_pad` or both depends on two aspects:
+Whether to use `h_pad` (horizontal padding), `u_pad` (uniform padding) or both depends on these aspects:
 
-1. The aspect ratio (AR) of the highest detail region compared to the AR of the image.
-2. The position of the highest detail region in the image.
+1. The AR of the image.
+2. The aspect ratio (AR) of the highest detail region.
+3. The position of the highest detail region in the image.
+4. How much background space there is around the highest detail region.
+
+If the image is square (AR=1) and is centered with plenty of air, then `h_pad` and `u_pad` are equivalent.
 
 In general, `h_pad` is better suited if it is important that the highest detail regions stays in the center of the image (although it does not make much difference if AR=1).
 

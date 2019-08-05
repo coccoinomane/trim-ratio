@@ -43,7 +43,12 @@ padded_image="$out_folder/${name}_upad${u_pad}_hpad${h_pad}.jpg"
 echo "Processing image ${name} with size ${W}x${H} and AR=${AR}..."
 
 # Get rectangle bounding highest definition region
-bounding_rectangle=$(magick "$image" -canny "$canny_parameters" -blur "${u_pad}"x65000 -format "%@" info:)
+# Optionally add $u_pad pixels of uniform padding
+if (( u_pad > 0 )); then
+    bounding_rectangle=$(magick "$image" -canny "$canny_parameters" -blur "${u_pad}"x65000 -format "%@" info:)
+else
+    bounding_rectangle=$(magick "$image" -canny "$canny_parameters" -format "%@" info:)
+fi
 echo "  bounding rectangle = $bounding_rectangle" 
 magick "$image" -crop "$bounding_rectangle" +repage "$trimmed_image"
 
