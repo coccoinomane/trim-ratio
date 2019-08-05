@@ -72,6 +72,36 @@ function getRectangle {
     printf '%.0fx%.0f+%.0f+%.0f' "$1" "$2" "$3" "$4"
 }
 
+# Check that the aspect ratio (W/H) of two images is the same.
+# A certain tolerance is allowed based on the pixel dimensions
+# of the images (the smaller the images, the highest the
+# tolerance).
+#
+# Returns:
+#  Success (status code 0) if the AR is the same
+#  Failure (status code 1) if the AR is not the same
+# Echo:
+#  Echoes an error message if the two aspect rations are
+#  not equal
+# shellcheck disable=SC2046
+function assertAspectRatioEqual {
+    # Extract info from images
+    local name1 name2 W1 W2 H1 H2 AR1 AR2
+    declare $(magick "$1" -format 'name1=%t\nW1=%w\nH1=%h\nAR1=%[fx:w/h]' info:)
+    declare $(magick "$2" -format 'name2=%t\nW2=%w\nH2=%h\nAR2=%[fx:w/h]' info:)
+    # Assuming 1px error in W and H (for ex. rounding up or down from
+    # previous operations) we compute tolerance as error on W/H:
+    # tolerance = d(AR)/AR = dW/W+dH/H = 1/W+1/H
+    local tolerance1 tolerance2 tolerance
+    tolerance1=$(echo "1/$W1 + 1/$H1" | bc -l)
+    tolerance2=$(echo "1/$W2 + 1/$H2" | bc -l)
+    tolerance=$(min "$tolerance1" "$tolerance2")
+    # Print warning message
+    assertEqual "$AR1" "$AR2" "$tolerance" || echo "  WARNING: Found AR discrepance between $name1 (AR=$AR1) and $name2 (AR=$AR2)"
+    # Return
+    assertEqual "$AR1" "$AR2" "$tolerance"
+}
+
 # Given a frame WxH and a rectangle B therein contained,
 # extend B until it has the same aspect ratio of WxH.
 # B will be kept as centered as possible.
@@ -127,7 +157,7 @@ function forceAspectRatio {
         if (( $(echo "$SB < $D2" | bc -l) )); then
             echo "    notice: object close to bottom edge, will pad more from top"
             yT="$(echo "$H-$HT" | bc -l)"
-            elif (( $(echo "$ST < $D2" | bc -l) )); then
+        elif (( $(echo "$ST < $D2" | bc -l) )); then
             echo "    notice: object close to top edge, will pad more from bottom"
             yT="0"
         fi
