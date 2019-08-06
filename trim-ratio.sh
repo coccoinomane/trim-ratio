@@ -30,17 +30,15 @@ source force-ar.sh
 canny_parameters="0x1+10%+30%"
 
 # Get image info
-name=$(magick "$image" -format "%t" info:)
-W=$(magick "$image" -format "%[w]" info: )
-H=$(magick "$image" -format "%[h]" info: )
-AR=$(magick "$image" -format "%[fx:w/h]" info: )
+(( name=W=H=AR=0 )) # initialize variables
+# shellcheck disable=SC2046
+declare $(magick "$image" -format 'name=%t\nW=%w\nH=%h\nAR=%[fx:w/h]' info:) 
+echo "Processing image $name with size ${W}x${H} and AR=$AR..."
 
 # Output images
 image_upad="$out_folder/${name}_upad${u_pad}.jpg" # highest detail region + upad
 image_upad_ar="$out_folder/${name}_upad${u_pad}_ar.jpg" # hdr + upad + forceAR
 image_upad_hpad_ar="$out_folder/${name}_upad${u_pad}_hpad${h_pad}_ar.jpg" # hdr + upad + hpad + forceAR
-
-echo "Processing image ${name} with size ${W}x${H} and AR=${AR}..."
 
 # Get rectangle bounding highest definition region
 # Optionally add $u_pad pixels of uniform padding
@@ -78,5 +76,6 @@ forceAspectRatio "$W" "$H" "$(getRectangle "$WT" "$HT" "$xT" "$yT")"
 padded_rectangle=$__output
 echo "  rectangle with pad = $padded_rectangle"
 echo "  writing to $image_upad_hpad_ar"
+[[ $padded_rectangle = "$bounding_rectangle" ]] && { echo "Nothing to trim, will exit"; exit; }
 magick "$image" -crop "$padded_rectangle" +repage "$image_upad_hpad_ar"
 assertAspectRatioEqual "$image" "$image_upad_hpad_ar"

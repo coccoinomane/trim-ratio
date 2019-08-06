@@ -9,7 +9,7 @@ It has been succesfully tested with catalogue and e-commerce images.
 
 To get the latest version or to contribute, check out out the Github repository:
 
-* https://github.com/coccoinomane/trim-ratio.
+* <https://github.com/coccoinomane/trim-ratio.>
 
 ## ALGORITHM
 
@@ -79,19 +79,19 @@ The following examples use the images in the `img-test` and `img-test-out` folde
 * INPUT: [img-test-out/_POD0009.jpg](img-test/_POD0009.jpg)
 * OUTPUT: [img-test-out/_POD0009_upad5_hpad0.jpg](img-test-out/_POD0009_upad0.jpg)
 
-### Trim an image and add 200px padding
+### Trim an image and add 100px horizontal padding
 
 ```bash
-./trim-ratio.sh img-test/_POD0009.jpg 0 200 img-test-out
+./trim-ratio.sh img-test/_POD0009.jpg 0 50 img-test-out
 ```
 
 * INPUT: [img-test-out/_POD0009.jpg](img-test/_POD0009.jpg)
-* OUTPUT: [img-test-out/_POD0009_upad5_hpad200.jpg](img-test-out/_POD0009_upad0_hpad200.jpg)
+* OUTPUT: [img-test-out/_POD0009_upad5_hpad50.jpg](img-test-out/_POD0009_upad0_hpad50.jpg)
 
-### Trim an entire folder of images with 200px padding
+### Trim an entire folder of images and add 100px horizontal padding
 
 ```bash
-find img-test -type f -depth 1 -name "*.jpg" | xargs -I {} ./trim-ratio.sh {} 0 200 img-test-out
+find img-test -type f -depth 1 -name "*.jpg" -exec ./trim-ratio.sh "{}" 0 50 img-test-out \;
 ```
 
 Process all images in the `img-test` folder.
