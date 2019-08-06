@@ -36,9 +36,9 @@ H=$(magick "$image" -format "%[h]" info: )
 AR=$(magick "$image" -format "%[fx:w/h]" info: )
 
 # Output images
-trimmed_image="$out_folder/${name}_upad${u_pad}_trim.jpg"
-zeropad_image="$out_folder/${name}_upad${u_pad}_hpad0.jpg"
-padded_image="$out_folder/${name}_upad${u_pad}_hpad${h_pad}.jpg"
+image_upad="$out_folder/${name}_upad${u_pad}.jpg" # highest detail region + upad
+image_upad_ar="$out_folder/${name}_upad${u_pad}_ar.jpg" # hdr + upad + forceAR
+image_upad_hpad_ar="$out_folder/${name}_upad${u_pad}_hpad${h_pad}_ar.jpg" # hdr + upad + hpad + forceAR
 
 echo "Processing image ${name} with size ${W}x${H} and AR=${AR}..."
 
@@ -49,16 +49,17 @@ if (( u_pad > 0 )); then
 else
     bounding_rectangle=$(magick "$image" -canny "$canny_parameters" -format "%@" info:)
 fi
-echo "  bounding rectangle = $bounding_rectangle" 
-magick "$image" -crop "$bounding_rectangle" +repage "$trimmed_image"
+echo "  bounding rectangle = $bounding_rectangle"
+echo "  writing to $image_upad"
+magick "$image" -crop "$bounding_rectangle" +repage "$image_upad"
 
 # Exand image to retain aspect ratio
 forceAspectRatio "$W" "$H" "$bounding_rectangle"
 zeropad_rectangle=$__output
-echo "  writing to $zeropad_image"
+echo "  writing to $image_upad_ar"
 [[ $zeropad_rectangle = "$bounding_rectangle" ]] && { echo "Nothing to trim, will exit"; exit; }
-magick "$image" -crop "$zeropad_rectangle" +repage "$zeropad_image"
-assertAspectRatioEqual "$image" "$zeropad_image"
+magick "$image" -crop "$zeropad_rectangle" +repage "$image_upad_ar"
+assertAspectRatioEqual "$image" "$image_upad_ar"
 
 # If no padding was requested we are done 
 (( h_pad <= 0 )) && { echo "  No padding requested, will exit"; exit; }
@@ -76,6 +77,6 @@ xT=$(max 0 "$(echo "$xT-$h_pad" | bc -l)")
 forceAspectRatio "$W" "$H" "$(getRectangle "$WT" "$HT" "$xT" "$yT")"
 padded_rectangle=$__output
 echo "  rectangle with pad = $padded_rectangle"
-echo "  writing to $padded_image"
-magick "$image" -crop "$padded_rectangle" +repage "$padded_image"
-assertAspectRatioEqual "$image" "$padded_image"
+echo "  writing to $image_upad_hpad_ar"
+magick "$image" -crop "$padded_rectangle" +repage "$image_upad_hpad_ar"
+assertAspectRatioEqual "$image" "$image_upad_hpad_ar"
