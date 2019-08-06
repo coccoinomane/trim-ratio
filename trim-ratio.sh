@@ -19,8 +19,8 @@
 
 # Parse arguments
 image="$1"
-h_pad=${2-0} # horizontal pad
-u_pad=${3-5}
+u_pad=${2-0}
+h_pad=${3-0} # horizontal pad
 out_folder=${4-.}
 
 # Dependencies
