@@ -76,7 +76,7 @@ The following examples use the images in the `img-test` and `img-test-out` folde
 ./trim-ratio.sh img-test/_POD0009.jpg 0 0 img-test-out
 ```
 
-* INPUT: [img-test-out/_POD0009.jpg](img-test-out/_POD0009.jpg)
+* INPUT: [img-test/_POD0009.jpg](img-test/_POD0009.jpg)
 * OUTPUT: [img-test-out/_POD0009_upad0.jpg](img-test-out/_POD0009_upad0.jpg)
 
 ### Trim an image and add 100px uniform padding
@@ -85,8 +85,8 @@ The following examples use the images in the `img-test` and `img-test-out` folde
 ./trim-ratio.sh img-test/_POD0009.jpg 50 0 img-test-out
 ```
 
-* INPUT: [img-test-out/_POD0009.jpg](img-test-out/_POD0009.jpg)
-* OUTPUT: [img-test-out/_POD0009_upad50_hpad0.jpg](img-test-out/_POD0009_upad50_hpad0.jpg)
+* INPUT: [img-test/_POD0009.jpg](img-test/_POD0009.jpg)
+* OUTPUT: [img-test-out/_POD0009_upad50_ar.jpg](img-test-out/_POD0009_upad50_ar.jpg)
 
 ### Trim an image and add 100px horizontal padding
 
@@ -94,8 +94,8 @@ The following examples use the images in the `img-test` and `img-test-out` folde
 ./trim-ratio.sh img-test/_POD0009.jpg 0 50 img-test-out
 ```
 
-* INPUT: [img-test-out/_POD0009.jpg]
-* OUTPUT: [img-test-out/_POD0009_upad0_hpad50.jpg](img-test-out/_POD0009_upad0_hpad50.jpg)
+* INPUT: [img-test/_POD0009.jpg](img-test/_POD0009.jpg)
+* OUTPUT: [img-test-out/_POD0009_upad0_hpad50_ar.jpg](img-test-out/_POD0009_upad0_hpad50_ar.jpg)
 
 
 ### Trim an entire folder of images and add 100px of uniform padding
