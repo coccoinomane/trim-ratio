@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+# We will use the dot as decimal separator
+export LC_NUMERIC="en_US.UTF-8"
+
 # Trim and center image around the highest detail region
 # without changing its aspect ratio.
 #
